@@ -20,7 +20,7 @@ export default function ShortenForm({ onSuccess }: { onSuccess: () => void }) {
   const [result, setResult] = useState<ShortenResult | null>(null)
 
   const handleShorten = async () => {
-    if (!url.trim()) return toast.error('กรุณากรอก URL ก่อนนะคะ')
+    if (!url.trim()) return toast.error('Please enter a URL first')
 
     let processedUrl = url.trim()
     if (!/^https?:\/\//i.test(processedUrl)) {
@@ -28,9 +28,10 @@ export default function ShortenForm({ onSuccess }: { onSuccess: () => void }) {
     }
 
     try { new URL(processedUrl) }
-    catch { return toast.error('URL ไม่ถูกต้อง') }
+    catch { return toast.error('Invalid URL') }
 
     setLoading(true)
+
     try {
       const res = await fetch('/api/shorten', {
         method: 'POST',
@@ -40,7 +41,7 @@ export default function ShortenForm({ onSuccess }: { onSuccess: () => void }) {
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || 'เกิดข้อผิดพลาด')
+        throw new Error(err.error || 'Something went wrong')
       }
 
       const data = await res.json()
@@ -49,14 +50,14 @@ export default function ShortenForm({ onSuccess }: { onSuccess: () => void }) {
       const qrCode = await QRCode.toDataURL(shortUrl, {
         width: 300,
         margin: 2,
-        color: { dark: '#c9a84c', light: '#070709' },
+        color: { dark: '#ff2d78', light: '#ffffff' },
       })
 
       setResult({ shortUrl, slug: data.slug, qrCode })
       onSuccess()
-      toast.success('สร้าง Short URL สำเร็จ! ✨')
+      toast.success('Short URL created!')
     } catch (err: any) {
-      toast.error(err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่')
+      toast.error(err.message || 'Something went wrong')
     } finally {
       setLoading(false)
     }
@@ -64,7 +65,7 @@ export default function ShortenForm({ onSuccess }: { onSuccess: () => void }) {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('คัดลอกแล้ว!')
+    toast.success('Copied!')
   }
 
   const downloadQR = () => {
@@ -73,112 +74,128 @@ export default function ShortenForm({ onSuccess }: { onSuccess: () => void }) {
     a.href = result.qrCode
     a.download = `qr-${result.slug}.png`
     a.click()
-    toast.success('ดาวน์โหลด QR Code แล้ว!')
+    toast.success('QR Code downloaded!')
   }
 
   return (
     <div className="animate-fade-up-delay-4">
-      <div className="glass-card rounded-2xl p-6 mb-6">
-        <label className="block text-xs tracking-[0.2em] uppercase text-[var(--text-secondary)] mb-3 tag-mono">
-          ✦ กรอก URL ที่ต้องการย่อ
-        </label>
 
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={url}
-            onChange={e => setUrl(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && isSignedIn && handleShorten()}
-            placeholder="https://your-very-long-url.com/path/to/page"
-            className="input-gold flex-1 px-4 py-3.5 rounded-xl text-sm w-full"
-          />
+      <div className="glass-card p-6 mb-4">
+        <p className="pixel-font mb-3" style={{ fontSize: '0.5rem', color: 'var(--text-secondary)' }}>
+          // PASTE YOUR URL
+        </p>
 
-          {isSignedIn ? (
-            <button
-              onClick={handleShorten}
-              disabled={loading}
-              className="btn-gold px-6 py-3.5 rounded-xl font-medium text-sm flex items-center gap-2 whitespace-nowrap disabled:opacity-60"
-            >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Scissors size={16} />}
-              {loading ? 'กำลังสร้าง...' : 'ย่อ URL'}
+        <input
+          type="text"
+          value={url}
+          onChange={e => setUrl(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && isSignedIn && handleShorten()}
+          placeholder="https://your-very-long-url.com"
+          className="input-gold w-full px-4 py-3 text-sm mb-3"
+        />
+
+        {isSignedIn ? (
+          <button
+            onClick={handleShorten}
+            disabled={loading}
+            className="btn-gold w-full py-3 flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {loading ? <Loader2 size={14} className="animate-spin" /> : <Scissors size={14} />}
+            {loading ? 'WORKING...' : 'SHORTEN IT'}
+          </button>
+        ) : (
+          <SignInButton mode="modal">
+            <button className="btn-gold w-full py-3 flex items-center justify-center gap-2">
+              <Lock size={14} />
+              LOGIN TO SHORTEN
             </button>
-          ) : (
-            <SignInButton mode="modal">
-              <button className="btn-gold px-6 py-3.5 rounded-xl font-medium text-sm flex items-center gap-2 whitespace-nowrap">
-                <Lock size={14} />
-                เข้าสู่ระบบ
-              </button>
-            </SignInButton>
-          )}
-        </div>
+          </SignInButton>
+        )}
       </div>
 
       {result && isSignedIn && (
-        <div className="glass-card rounded-2xl p-6 animate-fade-up">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-xs tracking-[0.2em] uppercase text-[var(--text-secondary)] mb-4 tag-mono">
-                ✦ Short URL ของคุณ
-              </p>
+        <div className="glass-card p-6 animate-fade-up">
 
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(201,168,76,0.05)] border border-[var(--border)] mb-3 hover:bg-[rgba(201,168,76,0.1)] transition">
-                
-                {/* 🔥 เปลี่ยนจาก span เป็น a */}
-                <a
-                  href={result.shortUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 text-[var(--gold)] tag-mono text-sm truncate hover:underline"
-                >
-                  {result.shortUrl}
-                </a>
+          <p className="pixel-font mb-3" style={{ fontSize: '0.5rem', color: 'var(--text-secondary)' }}>
+            // YOUR SHORT URL
+          </p>
 
-                <button
-                  onClick={() => copyToClipboard(result.shortUrl)}
-                  className="p-2 hover:text-[var(--gold)] text-[var(--text-secondary)] transition-colors rounded-lg hover:bg-[rgba(201,168,76,0.1)]"
-                >
-                  <Copy size={15} />
-                </button>
+          <div
+            className="flex items-center gap-2 p-3 mb-5"
+            style={{
+              background: '#fff0f5',
+              border: '2px solid #111',
+              boxShadow: '3px 3px 0 #111',
+            }}
+          >
+            {/* ✅ ลิงก์กดได้ */}
+            <a
+              href={result.shortUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 truncate hover:underline pixel-font"
+              style={{ color: 'var(--accent)', fontSize: '0.55rem' }}
+            >
+              {result.shortUrl}
+            </a>
 
-                <a
-                  href={result.shortUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 hover:text-[var(--gold)] text-[var(--text-secondary)] transition-colors rounded-lg hover:bg-[rgba(201,168,76,0.1)]"
-                >
-                  <ExternalLink size={15} />
-                </a>
-              </div>
+            <button
+              onClick={() => copyToClipboard(result.shortUrl)}
+              className="p-1.5 hover:bg-pink-50 transition-colors shrink-0"
+              style={{ border: '1px solid #111' }}
+              title="Copy"
+            >
+              <Copy size={13} />
+            </button>
 
-              <div className="divider-gold my-4" />
-              <p className="text-xs text-[var(--text-secondary)] tag-mono mb-1">URL ต้นฉบับ:</p>
-              <p className="text-xs text-[var(--text-secondary)] truncate opacity-60">{url}</p>
-            </div>
-
-            <div className="flex flex-col items-center">
-              <p className="text-xs tracking-[0.2em] uppercase text-[var(--text-secondary)] mb-4 tag-mono self-start">
-                ✦ QR Code
-              </p>
-
-              <div className="p-4 rounded-xl bg-[#070709] border border-[var(--border)] float-animation">
-                <Image
-                  src={result.qrCode}
-                  alt="QR Code"
-                  width={160}
-                  height={160}
-                  className="rounded-lg"
-                />
-              </div>
-
-              <button
-                onClick={downloadQR}
-                className="mt-3 flex items-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--gold)] transition-colors tag-mono"
-              >
-                <QrCode size={12} />
-                ดาวน์โหลด QR Code
-              </button>
-            </div>
+            {/* ✅ ปุ่มเปิด */}
+            <a
+              href={result.shortUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 hover:bg-pink-50 transition-colors shrink-0"
+              style={{ border: '1px solid #111' }}
+              title="Open"
+            >
+              <ExternalLink size={13} />
+            </a>
           </div>
+
+          <div className="divider-gold mb-5" />
+
+          <div className="flex flex-col items-center">
+            <p className="pixel-font mb-4" style={{ fontSize: '0.5rem', color: 'var(--text-secondary)' }}>
+              // QR CODE
+            </p>
+
+            <div
+              className="p-4 float-animation"
+              style={{
+                background: '#fff',
+                border: '2px solid #111',
+                boxShadow: '5px 5px 0 #111',
+              }}
+            >
+              <Image src={result.qrCode} alt="QR Code" width={160} height={160} />
+            </div>
+
+            <button
+              onClick={downloadQR}
+              className="btn-outline mt-4 px-5 py-2.5 flex items-center gap-2"
+            >
+              <QrCode size={12} />
+              DOWNLOAD QR
+            </button>
+          </div>
+
+          <div className="divider-gold mt-5 mb-4" />
+
+          <p className="pixel-font mb-1" style={{ fontSize: '0.45rem', color: 'var(--text-secondary)' }}>
+            ORIGINAL:
+          </p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-tertiary)' }}>
+            {url}
+          </p>
         </div>
       )}
     </div>

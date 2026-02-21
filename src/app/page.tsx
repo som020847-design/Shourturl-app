@@ -15,7 +15,9 @@ export default function Home() {
   return (
     <main className="relative min-h-screen z-10">
       <Hero />
-      <div className="max-w-4xl mx-auto px-4 pb-24">
+
+      {/* Content wrapper — กึ่งกลาง ไม่เต็มจอ */}
+      <div style={{ maxWidth: '680px', margin: '0 auto', padding: '0 24px 80px' }}>
         <ShortenForm onSuccess={handleNewUrl} />
         {isSignedIn && <UrlHistory key={refreshKey} />}
       </div>
