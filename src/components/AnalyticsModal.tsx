@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { X, MousePointerClick, Clock, TrendingUp, Activity } from 'lucide-react'
 
-
 interface ClickLog {
   id: string
   clickedAt: string
@@ -245,5 +244,3 @@ export default function AnalyticsModal({ urlId, urlData, onClose }: Props) {
     </div>
   )
 }
-
-
