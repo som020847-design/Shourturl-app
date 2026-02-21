@@ -37,6 +37,7 @@ body {
 }
 
 /* Pixel grid background */
+
 body::before {
   content: '';
   position: fixed;
@@ -46,7 +47,7 @@ body::before {
     linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
   background-size: 20px 20px;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 ::-webkit-scrollbar { width: 6px; }
@@ -282,4 +283,7 @@ body::before {
   line-height: 1.8;
   font-size: 16px;
   color: #555;
+}
+body {
+  font-family: 'Press Start 2P', monospace;
 }

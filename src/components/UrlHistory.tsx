@@ -244,15 +244,13 @@ export default function UrlHistory() {
         )}
       </div>
 
-      {selectedId && (
+      {selectedId && urls.find(u => u.id === selectedId) && (
         <AnalyticsModal
-          urlId={selectedId}
-          urlData={
-            urls.find(u => u.id === selectedId)!
-          }
-          onClose={() => setSelectedId(null)}
+            urlId={selectedId}
+            urlData={urls.find(u => u.id === selectedId)!}
+            onClose={() => setSelectedId(null)}
         />
-      )}
+    )}
     </>
   )
 } 

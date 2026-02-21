@@ -18,14 +18,17 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="th">
-        <body className="relative overflow-x-hidden">
+        <head>
+          <link
+            href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+            rel="stylesheet"
+          />
+        </head>
 
+        <body className="relative overflow-x-hidden">
           {/* Background mesh */}
           <div className="bg-mesh absolute inset-0 -z-20" />
 
-
-
-          {/* 🌸 Flower */}
           <Image
             src="/flower.png"
             alt="flower"
@@ -34,7 +37,6 @@ export default function RootLayout({
             className="floating-flower"
           />
 
-          {/* Main content */}
           <div className="relative z-10 pb-24">
             {children}
           </div>
@@ -46,20 +48,8 @@ export default function RootLayout({
                 background: '#13131a',
                 color: '#f0ece0',
                 border: '1px solid rgba(201,168,76,0.3)',
-                fontFamily: 'Outfit, sans-serif',
-                fontSize: '0.875rem',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#c9a84c',
-                  secondary: '#1a1200',
-                },
-              },
-              error: {
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: '#fff',
-                },
+                fontFamily: "'Press Start 2P', monospace", // 👈 เปลี่ยนตรงนี้ด้วย
+                fontSize: '0.75rem',
               },
             }}
           />

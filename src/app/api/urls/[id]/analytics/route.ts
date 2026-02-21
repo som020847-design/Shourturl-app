@@ -14,6 +14,7 @@ export async function GET(
   const shortUrl = await prisma.shortUrl.findFirst({
     where: { id, userId },
   })
+
   if (!shortUrl) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const logs = await prisma.clickLog.findMany({
